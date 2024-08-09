@@ -1,8 +1,10 @@
 {
   "name": "dotenv-constraint",
-  "type": "module",
+  "description": "Allows constraints to be added to environment variables",
   "version": "1.0.0",
+  "license": "MIT",
   "author": "Danny Louveton <danny.louveton@gmail.com>",
+  "type": "module",
   "main": "./dist/index.js",
   "release": {
     "branches": [
@@ -31,8 +33,6 @@
       "path": "cz-conventional-changelog"
     }
   },
-  "license": "ISC",
-  "description": "",
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "^22.1.0",

@@ -22,10 +22,10 @@ type EnvVariables = EnvVariable[]
 
 export const envConstraint = (envFile?: string, envSchemaFile?: string) => {
   if (!envFile) {
-    envFile = fs.readFileSync(path.join(__dirname, '../.env'), 'utf8')
+    envFile = fs.readFileSync(path.join(__dirname, '../../../.env'), 'utf8')
   }
   if (!envSchemaFile) {
-    envSchemaFile = fs.readFileSync(path.join(__dirname, '../.env.schema'), 'utf8')
+    envSchemaFile = fs.readFileSync(path.join(__dirname, '../../../.env.schema'), 'utf8')
   }
 
   const envVariables: EnvVariables = extractEnvVariables(envFile)
