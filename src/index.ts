@@ -1,9 +1,5 @@
 import fs from 'fs'
 import path from 'path'
-import { fileURLToPath } from 'node:url'
-import { dirname } from 'node:path'
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
 
 type EnvSchema = {
   name: string
@@ -20,12 +16,44 @@ type EnvVariable = {
 
 type EnvVariables = EnvVariable[]
 
-export const envConstraint = (envFile?: string, envSchemaFile?: string) => {
-  if (!envFile) {
-    envFile = fs.readFileSync(path.join(__dirname, '../.env'), 'utf8')
-  }
-  if (!envSchemaFile) {
-    envSchemaFile = fs.readFileSync(path.join(__dirname, '../.env.schema'), 'utf8')
+type dotenvErrorsCode = 'empty' | 'invalid_type' | 'file_not_found' | 'missing'
+
+type dotenvErrors = {
+  code?: dotenvErrorsCode
+  variable?: string
+  expected?: string
+}
+
+type dotenvResult = {
+  errors: dotenvErrors[]
+  success: boolean
+}
+export const validateEnv = (config?: {
+  dotenvPath?: string
+  schemaPath?: string
+}): dotenvResult => {
+  const appRoot = process.cwd()
+  let envFile: string
+  let envSchemaFile: string
+
+  try {
+    envFile = fs.readFileSync(
+      path.join(appRoot, config?.dotenvPath ?? '.env'),
+      'utf8'
+    )
+    envSchemaFile = fs.readFileSync(
+      path.join(appRoot, config?.schemaPath ?? '.env.schema'),
+      'utf8'
+    )
+  } catch (error) {
+    return {
+      errors: [
+        {
+          code: 'file_not_found',
+        },
+      ],
+      success: false,
+    }
   }
 
   const envVariables: EnvVariables = extractEnvVariables(envFile)
@@ -33,15 +61,9 @@ export const envConstraint = (envFile?: string, envSchemaFile?: string) => {
 
   const result = checkConstraints(envVariables, envSchema)
 
-  if (result !== true) {
-    return {
-      errors: result,
-      success: false
-    }
-  }
   return {
-    errors: {},
-    success: true
+    errors: result,
+    success: result.length === 0,
   }
 }
 
@@ -70,13 +92,13 @@ const extractEnvSchema = (schemaFile: string) => {
 }
 
 const checkConstraints = (envVariables: EnvVariables, envSchema: EnvSchema) => {
-  const errors: any = []
+  const errors: dotenvErrors[] = []
   for (const { name, constraints } of envSchema) {
     const envVariable = envVariables.find((v) => v.name === name)
     if (!envVariable && !constraints.optional) {
       errors.push({
-        code: 'required',
-        variable: name
+        variable: name,
+        code: 'missing',
       })
     } else if (envVariable) {
       if (constraints.number) {
@@ -93,39 +115,30 @@ const checkConstraints = (envVariables: EnvVariables, envSchema: EnvSchema) => {
       }
     }
   }
-  if (errors.length) {
-    return errors
-  }
-  return true
+  return errors
 }
 
-const isRequired = (envVariable: EnvVariable) => {
+const isRequired = (envVariable: EnvVariable): dotenvErrors | true => {
   if (!envVariable.value) {
     return {
-      code: 'required',
-      variable: envVariable.name
+      variable: envVariable.name,
+      code: 'empty',
     }
   }
   return true
 }
 
-const isNumber = (envVariable: EnvVariable) => {
+const isNumber = (envVariable: EnvVariable): dotenvErrors | true => {
   if (envVariable.value && isNaN(Number(envVariable.value))) {
     return {
+      variable: envVariable.name,
       code: 'invalid_type',
       expected: 'number',
-      variable: envVariable.name
     }
   }
   return true
 }
 
 export default {
-  envConstraint
+  validateEnv,
 }
-
-// 💡
-// add string, number etc
-// system to display warning or throw errors
-// folder with contributors can add constraints to the schema
-// generate type from schema in environment.d.ts
