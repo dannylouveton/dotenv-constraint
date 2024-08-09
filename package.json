@@ -1,5 +1,5 @@
 {
-  "name": "dotenv-constraint",
+  "name": "dotenv-constraint-tmp",
   "description": "Allows constraints to be added to environment variables",
   "version": "1.0.0",
   "license": "MIT",
