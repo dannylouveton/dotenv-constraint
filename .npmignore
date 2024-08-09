@@ -1,2 +1,13 @@
 # Dependency directories
 node_modules/
+.git/
+.github/
+
+jest.config.js
+tsconfig.json
+package.lock.json
+index.ts
+index.test.ts
+index.test.js
+.gitignore
+.npmignore

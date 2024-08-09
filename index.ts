@@ -125,6 +125,7 @@ export default {
 }
 
 // 💡
+// utilisable avec commonjs and esm
 // add string, number etc
 // system to display warning or throw errors
 // folder with contributors can add constraints to the schema

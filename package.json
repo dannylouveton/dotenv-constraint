@@ -5,7 +5,7 @@
   "license": "MIT",
   "author": "Danny Louveton <danny.louveton@gmail.com>",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./index.js",
   "release": {
     "branches": [
       "main"
