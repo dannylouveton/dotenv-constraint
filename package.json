@@ -1,0 +1,46 @@
+{
+  "name": "dotenv-constraint",
+  "type": "module",
+  "version": "1.0.0",
+  "author": "Danny Louveton <danny.louveton@gmail.com>",
+  "main": "./dist/index.js",
+  "release": {
+    "branches": [
+      "main"
+    ]
+  },
+  "scripts": {
+    "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
+    "ts": "npx tsc --watch",
+    "build": "npx tsc",
+    "commit": "cz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dannylouveton/dotenv-constraint.git"
+  },
+  "keywords": [
+    "dovenv",
+    "constraint",
+    "types",
+    "check",
+    "validate"
+  ],
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.1.0",
+    "jest": "^29.7.0",
+    "semantic-release": "^24.0.0",
+    "ts-node": "^10.9.2"
+  },
+  "dependencies": {
+    "commitizen": "^4.3.0"
+  }
+}
