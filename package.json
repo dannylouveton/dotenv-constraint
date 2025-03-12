@@ -1,7 +1,7 @@
 {
   "name": "dotenv-constraint",
   "description": "A lightweight package to enforce constraints on environment variables in JavaScript, ensuring required variables are defined and match expected types.",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "license": "MIT",
   "author": "Danny Louveton <dannylouveton@gmail.com>",
   "type": "module",
@@ -13,9 +13,7 @@
     "require": "./dist/index.cjs"
   },
   "files": [
-    "dist",
-    "!dist/**/*.test.js",
-    "!dist/**/*.spec.js"
+    "dist"
   ],
   "release": {
     "branches": [
