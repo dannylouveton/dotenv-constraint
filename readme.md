@@ -100,6 +100,47 @@ If validation fails, the function returns an error object:
 }
 ```
 
+### Error Codes
+
+**dotenv-constraint** detects the following types of issues:
+
+| Error Code | Description | Example |
+|------------|-------------|---------|
+| `missing` | A required variable is not defined in `.env` | Variable exists in schema but not in `.env` |
+| `empty` | A required variable is defined but has no value | `DB_USERNAME=` (empty value) |
+| `invalid_type` | A variable doesn't match the expected type constraint | See details below |
+| `duplicate` | A variable is declared multiple times in `.env` | `PORT=3000` and `PORT=4000` in the same file |
+| `not_in_schema` | A variable exists in `.env` but is not declared in `.env.schema` | Variable in `.env` that doesn't exist in schema |
+| `file_not_found` | The `.env` or `.env.schema` file cannot be found | Missing configuration files |
+
+#### `invalid_type` Error Details
+
+The `invalid_type` error occurs when a variable's value doesn't match its type constraint defined in the schema. The error includes an `expected` field indicating the required type.
+
+**Currently supported type constraints:**
+
+- **`#number`**: The variable must be a valid number
+
+**Examples of `invalid_type` errors:**
+
+```ts
+// ❌ Invalid - not a number
+DB_PORT=abc
+// Schema: DB_PORT= #number
+// Error: { code: "invalid_type", variable: "DB_PORT", expected: "number" }
+
+// ❌ Invalid - text mixed with numbers
+MAX_CONNECTIONS=100users
+// Schema: MAX_CONNECTIONS= #number
+// Error: { code: "invalid_type", variable: "MAX_CONNECTIONS", expected: "number" }
+
+// ✅ Valid
+DB_PORT=5432
+MAX_CONNECTIONS=100
+```
+
+**Note:** More type constraints may be added in future versions (e.g., `#boolean`, `#email`, `#url`).
+
 ### Error Handling
 
 If errors are detected, you can stop your application:

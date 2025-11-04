@@ -16,7 +16,7 @@ type EnvVariable = {
 
 type EnvVariables = EnvVariable[]
 
-type dotenvErrorsCode = 'empty' | 'invalid_type' | 'file_not_found' | 'missing'
+type dotenvErrorsCode = 'empty' | 'invalid_type' | 'file_not_found' | 'missing' | 'duplicate' | 'not_in_schema'
 
 type dotenvErrors = {
   code?: dotenvErrorsCode
@@ -59,17 +59,26 @@ export const validateEnv = (config?: {
   const envVariables: EnvVariables = extractEnvVariables(envFile)
   const envSchema = extractEnvSchema(envSchemaFile)
 
-  const result = checkConstraints(envVariables, envSchema)
+  const duplicateErrors = checkDuplicates(envVariables)
+  const undeclaredErrors = checkUndeclared(envVariables, envSchema)
+  const constraintErrors = checkConstraints(envVariables, envSchema)
+
+  const allErrors = [...duplicateErrors, ...undeclaredErrors, ...constraintErrors]
 
   return {
-    errors: result,
-    success: result.length === 0,
+    errors: allErrors,
+    success: allErrors.length === 0,
   }
 }
 
 const extractEnvVariables = (dotenvFile: string) => {
   const envVariables: EnvVariables = []
   for (const line of dotenvFile.split('\n')) {
+    const trimmedLine = line.trim()
+    // Ignore empty lines and comments
+    if (!trimmedLine || trimmedLine.startsWith('#')) {
+      continue
+    }
     if (line.includes('=')) {
       const [name, value] = line.split('=')
       envVariables.push({ name, value })
@@ -89,6 +98,44 @@ const extractEnvSchema = (schemaFile: string) => {
     }
   }
   return schema
+}
+
+const checkDuplicates = (envVariables: EnvVariables) => {
+  const errors: dotenvErrors[] = []
+  const seen = new Set<string>()
+  const duplicates = new Set<string>()
+
+  for (const { name } of envVariables) {
+    if (seen.has(name)) {
+      duplicates.add(name)
+    }
+    seen.add(name)
+  }
+
+  for (const name of duplicates) {
+    errors.push({
+      variable: name,
+      code: 'duplicate',
+    })
+  }
+
+  return errors
+}
+
+const checkUndeclared = (envVariables: EnvVariables, envSchema: EnvSchema) => {
+  const errors: dotenvErrors[] = []
+  const schemaVariables = new Set(envSchema.map((s) => s.name))
+
+  for (const { name } of envVariables) {
+    if (!schemaVariables.has(name)) {
+      errors.push({
+        variable: name,
+        code: 'not_in_schema',
+      })
+    }
+  }
+
+  return errors
 }
 
 const checkConstraints = (envVariables: EnvVariables, envSchema: EnvSchema) => {
